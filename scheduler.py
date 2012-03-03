@@ -11,18 +11,22 @@ class Date :
         self._key = int (key)
         self._val = val
         self._taken = False
+    def name (self) : return self._val
     def key (self):
         return self._key
+    def __str__ (self):
+        return "Date %d: %s" % (self._key, self._val)
 
 ##=======================================================================
 
 class Person : 
 
     def __init__ (self, key, val, schedule):
-        self._key = key
+        self._key = int (key)
         self._name = val['name']
-        self._date_list = ( schedule._dates[d] for d in val['dates'] )
+        self._date_list = [ schedule._dates[d] for d in val['dates'] ]
         self._date_set = set( [ d._key for d in self._date_list ] )
+    def name (self) : return self._name
 
 ##=======================================================================
 
@@ -31,6 +35,9 @@ class Director (Person):
     def __init__ (self, key, val, schedule):
         Person.__init__ (self, key, val, schedule)
         self._num_gigs = 0
+    def __str__ (self):
+        return "Director %d: %s" % (self._key, self._name)
+
 
 ##=======================================================================
 
@@ -38,9 +45,16 @@ class Writer (Person):
 
     def __init__ (self, key, val, schedule):
         Person.__init__ (self, key, val, schedule)
-        l  = ( schedule._director[d] for d in val['directors'])
+        l  = [ schedule._directors[d] for d in val['directors'] ]
         self._director_list = l
-        self._director_set = ( d._key for d in l )
+        self._director_set = set([ d._key for d in l ])
+
+    def __str__ (self):
+        return "Writer %d: %s" % (self._key, self._name)
+
+    def output (self):
+        print " %s --> w/ %s on %s" % \
+            (self, self._choice[1].name(), self._choice[0].name ())
 
 ##=======================================================================
 
@@ -66,27 +80,33 @@ class Schedule:
             raise Exception ("no schedules worked!")
 
     def _schedule(self, w, rest):
+        print "+ Schedule %s @ length %d" % (w, len (rest))
         for date in w._date_list:
+            print "++ Try date %s" % date
             if not date._taken:
                 date._taken = True
-                for k,director in self._directors.values() :
-                    if not k in w._director_set and \
+                for k,director in self._directors.items() :
+                    if not (k in w._director_set) and \
                         director._num_gigs < 2 and \
                         date._key in director._date_set:
 
+                        print "+++ Try director %s" % director
+
                         director._num_gigs += 1
-                        self._choice = [ date, director ] 
-                        if self._schedule (rest[0], rest[1:]) :
+                        w._choice = [ date, director ] 
+                        if len (rest) == 0 or \
+                            self._schedule (rest[0], rest[1:]) :
                             return True
                         else:
                             director._num_gigs -= 1
-                            self._choice = None
+                            w._choice = None
                 date._taken = False
         return False
 
     def output (self):
-        pass
-
+        print "Schedule ===================================="
+        for w in self._writers.values():
+            w.output()
 
 ##=======================================================================
 
