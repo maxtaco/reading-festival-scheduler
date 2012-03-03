@@ -8,8 +8,10 @@ import json
 class Date : 
 
     def __init__ (self, key, val):
-        self._key = key
+        self._key = int (key)
         self._val = val
+    def key (self):
+        return self._key
 
 ##=======================================================================
 
@@ -18,9 +20,8 @@ class Person :
     def __init__ (self, key, val, schedule):
         self._key = key
         self._name = val['name']
-        self._dates = set ()
-        for d in val['dates']:
-            self._dates.add (schedule._dates[d])
+        self._dates = []
+        self._dates = ( schedule._dates[d] for d in val['dates'] )
 
 ##=======================================================================
 
@@ -35,9 +36,7 @@ class Writer (Person):
 
     def __init__ (self, key, val, schedule):
         Person.__init__ (self, key, val, schedule)
-        self._directors = set ()
-        for d in val['directors']:
-            self._directors.add (schedule._director[d])
+        self._directors = ( schedule._director[d] for d in val['directors'])
 
 ##=======================================================================
 
@@ -46,7 +45,7 @@ class Schedule:
     def __init__ (self):
         self._dates = {}
         self._writers = {}
-        self._directores = {}
+        self._directors = {}
 
     def load_from_json (self, js):
         for k,v in js['dates'].items():
@@ -55,6 +54,12 @@ class Schedule:
             self._directors[k] = Director (k, v, self)
         for k,v in js['writers'].items():
             self._writers[k] = Writer (k, v, self)
+
+    def schedule (self) : 
+        pass
+
+    def output (self):
+        pass
 
 
 ##=======================================================================
