@@ -10,7 +10,7 @@ class Date :
     def __init__ (self, key, val):
         self._key = int (key)
         self._val = val
-        self._taken = 0
+        self._taken = False
     def key (self):
         return self._key
 
@@ -67,18 +67,21 @@ class Schedule:
 
     def _schedule(self, w, rest):
         for date in w._date_list:
-            for k,director in self._directors.values() :
-                if not k in w._director_set and \
-                    director._num_gigs < 2 and \
-                    date._key in director._date_set:
+            if not date._taken:
+                date._taken = True
+                for k,director in self._directors.values() :
+                    if not k in w._director_set and \
+                        director._num_gigs < 2 and \
+                        date._key in director._date_set:
 
-                    director._num_gigs += 1
-                    self._choice = [ date, director ] 
-                    if self._schedule (rest[0], rest[1:]) :
-                        return True
-                    else:
-                        director._num_gigs -= 1
-                        self._choice = None
+                        director._num_gigs += 1
+                        self._choice = [ date, director ] 
+                        if self._schedule (rest[0], rest[1:]) :
+                            return True
+                        else:
+                            director._num_gigs -= 1
+                            self._choice = None
+                date._taken = False
         return False
 
     def output (self):
