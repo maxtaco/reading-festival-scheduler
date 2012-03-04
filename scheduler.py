@@ -120,7 +120,9 @@ class Schedule:
 
     def output (self):
         print "Schedule ===================================="
-        for w in self._writers.values():
+        wl = self._writers.values()
+        wl.sort (key = lambda x : x._choice[0]._date)
+        for w in wl:
             w.output()
 
 ##=======================================================================
