@@ -1,6 +1,7 @@
 
 import sys
 import json
+import datetime
 
 ##=======================================================================
 ##=======================================================================
@@ -10,12 +11,22 @@ class Date :
     def __init__ (self, key, val):
         self._key = int (key)
         self._val = val
+        [mon,day] = [ int (i) for i in val.split (".") ]
+        year = 2012
+        self._date = datetime.date (2012, mon, day)
         self._taken = False
+
     def name (self) : return self._val
+
     def key (self):
         return self._key
+
     def __str__ (self):
         return "Date %d: %s" % (self._key, self._val)
+
+    def is_adjacent (self, d2):
+        delta = self._date - d2._date
+        return (abs(delta.days) <= 1)
 
 ##=======================================================================
 
@@ -83,11 +94,15 @@ class Schedule:
         print "+ Schedule %s @ length %d" % (w, len (rest))
         for date in w._date_list:
             print "++ Try date %s" % date
-            if not date._taken:
+            prev = self._dates.get (date._key - 1)
+            if date._taken:
+                print "+++ is taken...."
+            elif prev and date.is_adjacent (prev) and prev._taken :
+                print "+++ is next to a taken date %s" % prev
+            else :
                 date._taken = True
-                for k,director in self._directors.items() :
-                    if not (k in w._director_set) and \
-                        director._num_gigs < 2 and \
+                for director in w._director_list:
+                    if director._num_gigs < 2 and \
                         date._key in director._date_set:
 
                         print "+++ Try director %s" % director
